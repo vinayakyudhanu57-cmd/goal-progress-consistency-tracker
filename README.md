@@ -199,12 +199,3 @@ goal-progress-consistency-tracker/
 ```
 
 ---
-
-## 10. Limitations & GitHub Pages Architecture Note
-
-1. **R Runtime Dependency**:
-   All status evaluations, percentage calculations, streak counts, and weekly summaries are genuinely executed in R. The interactive web interface connects to this backend via local HTTP requests. Without the R service running, new calculations cannot be evaluated.
-2. **GitHub Pages Limitation**:
-   GitHub Pages serves static web files only and does not execute R code or host a Plumber API server. Consequently, this repository is designed and intended for local execution. Running on GitHub Pages without an external R server would disconnect the frontend from genuine R calculations.
-3. **Deterministic Heuristic Evaluation**:
-   The consistency score is a deterministic behavioral metric based on logging frequency; it reflects habit adherence rather than qualitative assessment of session quality.
