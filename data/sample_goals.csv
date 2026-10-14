@@ -1,0 +1,6 @@
+id,name,description,category,start_offset_days,target_offset_days,target_value,unit,milestones
+goal_1,Data Structures & Algorithms,Comprehensive coding problem sets and data structures practice,Learning,-21,14,60,hours,20:Arrays & Trees;40:Graphs & Dynamic Prog;60:Advanced Mock Tests
+goal_2,System Architecture Manual,Read and annotate foundational distributed system patterns,Reading,-30,7,15,chapters,5:Part 1 Foundations;10:Part 2 Distributed Patterns;15:Part 3 Case Studies
+goal_3,Portfolio Web Application,Build a production-ready personal project with automated tests,Projects,-25,10,20,features,5:UI Layout & Shell;12:Backend API & State;20:Testing & Polish
+goal_4,Cloud Practitioner Certification,Prepare domain topics and complete practice exam sets,Career,-40,-3,40,hours,15:Core Cloud Concepts;30:Security & Architecture;40:Full Practice Exams
+goal_5,30-Day Morning Fitness Challenge,Consistent morning aerobic sessions and distance tracking,Health,-12,18,50,kilometers,15:Week 1 Habit Base;30:Mid-Point Mileage;50:Challenge Completion

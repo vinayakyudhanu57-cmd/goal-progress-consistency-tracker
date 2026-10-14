@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Goal Progress & Consistency Tracker - Professional R-powered productivity dashboard. Accurately identifies Progressing, Stalled, Overdue, and Completed goals with streak and milestone tracking.">
+  <title>Goal Progress & Consistency Tracker - R-Powered Habit & Milestone Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Application Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-block">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 6v6l4 2"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Goal Progress &amp; Consistency Tracker</h1>
+          <p class="brand-subtitle">Deterministic Status Analytics, Milestone Tracking &amp; Weekly Activity Engine</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Live R Backend Status Pill -->
+        <div id="backend-status-badge" class="status-badge status-checking" title="Checking R Backend connection...">
+          <span class="status-dot"></span>
+          <span id="backend-status-text">Connecting to R...</span>
+        </div>
+        <button id="btn-quick-log" class="btn btn-primary btn-sm" title="Log progress entry for any goal">
+          + Log Progress
+        </button>
+        <button id="btn-open-create-goal" class="btn btn-secondary btn-sm" title="Create a new goal">
+          + New Goal
+        </button>
+        <button id="btn-load-sample" class="btn btn-outline btn-sm" title="Load sample dataset for immediate demonstration">
+          Load Sample Data
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    <!-- Top Weekly Summary KPI Row -->
+    <section class="kpi-section" aria-label="Summary Statistics">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">Monitored Goals</div>
+          <div class="kpi-value" id="kpi-total-goals">0</div>
+          <div class="kpi-sub" id="kpi-active-goals">0 Active Goals</div>
+        </div>
+        <div class="kpi-card kpi-card-progressing">
+          <div class="kpi-label">Progressing</div>
+          <div class="kpi-value" id="kpi-progressing-count">0</div>
+          <div class="kpi-sub">Active &amp; on schedule</div>
+        </div>
+        <div class="kpi-card kpi-card-completed">
+          <div class="kpi-label">Completed</div>
+          <div class="kpi-value" id="kpi-completed-count">0</div>
+          <div class="kpi-sub">Target reached</div>
+        </div>
+        <div class="kpi-card kpi-card-stalled">
+          <div class="kpi-label">Stalled (&ge; 7d)</div>
+          <div class="kpi-value" id="kpi-stalled-count">0</div>
+          <div class="kpi-sub">Inactivity threshold met</div>
+        </div>
+        <div class="kpi-card kpi-card-overdue">
+          <div class="kpi-label">Overdue</div>
+          <div class="kpi-value" id="kpi-overdue-count">0</div>
+          <div class="kpi-sub">Past target deadline</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Weekly Progress</div>
+          <div class="kpi-value" id="kpi-weekly-entries">0</div>
+          <div class="kpi-sub" id="kpi-weekly-value">0 units in last 7 days</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Advisory Banner (Overdue or Stalled Alerts) -->
+    <div id="system-alert-banner" class="alert-banner" style="display: none;">
+      <div class="alert-icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+      <div class="alert-content">
+        <div class="alert-title" id="alert-banner-title">Attention Needed</div>
+        <div class="alert-message" id="alert-banner-message">Some goals have reached their deadline or require recent progress.</div>
+      </div>
+    </div>
+
+    <!-- Filter & View Toolbar -->
+    <div class="toolbar-card">
+      <div class="filter-controls">
+        <!-- Search Input -->
+        <div class="search-box">
+          <input type="text" id="input-search" class="form-control form-control-sm" placeholder="Search goals by name or description...">
+        </div>
+
+        <!-- Category Filter -->
+        <div class="filter-group">
+          <label for="select-category-filter">Category:</label>
+          <select id="select-category-filter" class="form-control form-control-sm">
+            <option value="all">All Categories</option>
+          </select>
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="status-filter-pills" role="tablist">
+          <button class="pill-btn active" data-status="all">All (<span id="count-all">0</span>)</button>
+          <button class="pill-btn" data-status="Progressing">Progressing (<span id="count-progressing">0</span>)</button>
+          <button class="pill-btn" data-status="Completed">Completed (<span id="count-completed">0</span>)</button>
+          <button class="pill-btn" data-status="Stalled">Stalled (<span id="count-stalled">0</span>)</button>
+          <button class="pill-btn" data-status="Overdue">Overdue (<span id="count-overdue">0</span>)</button>
+        </div>
+      </div>
+
+      <div class="view-switch-group">
+        <button id="tab-view-goals" class="btn btn-outline btn-sm active-view">Goals Grid</button>
+        <button id="tab-view-weekly" class="btn btn-outline btn-sm">Weekly Analytics</button>
+      </div>
+    </div>
+
+    <!-- Workspace: Goals Grid View -->
+    <section id="section-goals-view" class="goals-grid-section" aria-label="Goals List">
+      <!-- Empty State Card -->
+      <div id="empty-goals-state" class="empty-state-card" style="display: none;">
+        <div class="empty-icon-wrap" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6b5b95" stroke-width="1.8">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M12 8v8"></path>
+            <path d="M8 12h8"></path>
+          </svg>
+        </div>
+        <h3>No Goals Tracked Yet</h3>
+        <p>Create your first goal to start monitoring daily progress, consistency streaks, and milestone achievements, or load the sample dataset.</p>
+        <div class="empty-actions">
+          <button id="btn-empty-create" class="btn btn-primary">+ Create New Goal</button>
+          <button id="btn-empty-sample" class="btn btn-secondary">Load Sample Goals</button>
+        </div>
+      </div>
+
+      <!-- Dynamically Populated Goals Container -->
+      <div id="goals-container" class="goals-grid">
+        <!-- Rendered by script.js -->
+      </div>
+    </section>
+
+    <!-- Workspace: Weekly Analytics View -->
+    <section id="section-weekly-view" class="weekly-analytics-section" style="display: none;" aria-label="Weekly Analytics">
+      <div class="analytics-layout">
+        <!-- 7-Day Activity Chart Card -->
+        <div class="card analytics-card">
+          <div class="card-header">
+            <h3>Daily Activity Breakdown (Past 7 Days)</h3>
+            <span class="sub-caption">Log entries per calendar day</span>
+          </div>
+          <div id="weekly-chart-container" class="bar-chart-container">
+            <!-- Dynamically populated CSS bar chart -->
+          </div>
+        </div>
+
+        <!-- Upcoming Deadlines Card -->
+        <div class="card analytics-card">
+          <div class="card-header">
+            <h3>Upcoming Deadlines (Next 7 Days)</h3>
+            <span class="sub-caption">Prioritize these pending targets</span>
+          </div>
+          <div id="upcoming-deadlines-container">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Summary Table -->
+      <div class="card analytics-card" style="margin-top: 20px;">
+        <div class="card-header">
+          <h3>Category Distribution &amp; Completion</h3>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="category-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Total Goals</th>
+                <th>Completed Goals</th>
+                <th>Average Completion</th>
+              </tr>
+            </thead>
+            <tbody id="category-table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Algorithmic Rules & Status Explanation Guide -->
+    <section class="rules-guide-section" aria-label="Status Classification Logic">
+      <div class="card rules-card">
+        <h2 class="rules-heading">Deterministic Status Rules &amp; Evaluation Logic</h2>
+        <div class="rules-grid">
+          <div class="rule-box rule-box-progressing">
+            <span class="badge badge-progressing">Progressing</span>
+            <p>Target is incomplete, current date is within deadline, and progress has been recorded within the <strong>7-day inactivity window</strong>.</p>
+          </div>
+          <div class="rule-box rule-box-completed">
+            <span class="badge badge-completed">Completed</span>
+            <p>The cumulative progress value has reached or exceeded the target goal (<strong>&ge; 100%</strong>), regardless of target date.</p>
+          </div>
+          <div class="rule-box rule-box-stalled">
+            <span class="badge badge-stalled">Stalled</span>
+            <p>Target is incomplete and within deadline, but <strong>no progress has been logged for 7 or more consecutive days</strong>.</p>
+          </div>
+          <div class="rule-box rule-box-overdue">
+            <span class="badge badge-overdue">Overdue</span>
+            <p>The target deadline has passed and the cumulative progress has not reached 100%.</p>
+          </div>
+        </div>
+        <p class="rules-footer-note">
+          <strong>Consistency Metric:</strong> Evaluated based on unique active logging days in the past 14-day rolling window. Requires at least 3 days of tracking history before reporting consistency to prevent premature or misleading scoring.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Create / Edit Goal -->
+  <div id="modal-goal" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="modal-goal-title">Create New Goal</h2>
+        <button type="button" class="btn-close" id="btn-close-goal-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-goal" novalidate>
+        <input type="hidden" id="goal-id-input" value="">
+
+        <div class="form-group">
+          <label for="goal-name-input">Goal Name *</label>
+          <input type="text" id="goal-name-input" class="form-control" placeholder="e.g., Data Structures &amp; Algorithms Practice" required>
+        </div>
+
+        <div class="form-group">
+          <label for="goal-desc-input">Description</label>
+          <textarea id="goal-desc-input" class="form-control" rows="2" placeholder="Brief outline of target objectives..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="goal-category-input">Category</label>
+            <input type="text" id="goal-category-input" class="form-control" list="category-datalist" placeholder="Learning, Reading, Career..." value="Learning">
+            <datalist id="category-datalist">
+              <option value="Learning">
+              <option value="Reading">
+              <option value="Projects">
+              <option value="Career">
+              <option value="Health">
+              <option value="Personal">
+            </datalist>
+          </div>
+          <div class="form-group flex-1">
+            <label for="goal-unit-input">Unit of Measurement *</label>
+            <input type="text" id="goal-unit-input" class="form-control" placeholder="hours, chapters, books..." value="hours" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="goal-start-input">Start Date *</label>
+            <input type="date" id="goal-start-input" class="form-control" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="goal-target-date-input">Target Deadline *</label>
+            <input type="date" id="goal-target-date-input" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="goal-target-val-input">Target Value *</label>
+          <input type="number" id="goal-target-val-input" class="form-control" min="0.1" step="any" placeholder="e.g., 50" required>
+          <span class="field-hint">Cumulative total needed to complete the goal</span>
+        </div>
+
+        <!-- Milestones Section -->
+        <div class="milestones-form-section">
+          <div class="milestones-form-header">
+            <label>Optional Milestones</label>
+            <button type="button" id="btn-add-milestone-row" class="btn btn-outline btn-xs">+ Add Milestone</button>
+          </div>
+          <div id="milestones-rows-container">
+            <!-- Dynamic rows -->
+          </div>
+        </div>
+
+        <div id="goal-form-alert" class="alert alert-error" style="display: none;">
+          <span class="alert-icon">!</span>
+          <span id="goal-form-alert-msg">Validation error</span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-goal-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-goal">Save Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Log Progress Entry -->
+  <div id="modal-progress" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog modal-dialog-sm">
+      <div class="modal-header">
+        <h2>Log Dated Progress</h2>
+        <button type="button" class="btn-close" id="btn-close-progress-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="form-progress" novalidate>
+        <div class="form-group">
+          <label for="prog-goal-select">Select Goal *</label>
+          <select id="prog-goal-select" class="form-control" required>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="prog-date-input">Log Date *</label>
+            <input type="date" id="prog-date-input" class="form-control" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="prog-value-input">Amount Achieved (<span id="prog-unit-label">units</span>) *</label>
+            <input type="number" id="prog-value-input" class="form-control" min="0.1" step="any" placeholder="e.g., 2.5" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prog-notes-input">Session Notes (Optional)</label>
+          <input type="text" id="prog-notes-input" class="form-control" placeholder="What did you complete in this session?">
+        </div>
+
+        <div id="progress-form-alert" class="alert alert-error" style="display: none;">
+          <span class="alert-icon">!</span>
+          <span id="progress-form-alert-msg">Validation error</span>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btn-cancel-progress-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-progress">Record Progress</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Progress History Drawer -->
+  <div id="modal-history" class="modal-backdrop" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <h2 id="history-modal-goal-name">Goal History</h2>
+          <span class="sub-caption" id="history-modal-goal-meta">Logged entries</span>
+        </div>
+        <button type="button" class="btn-close" id="btn-close-history-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="history-content">
+        <div id="history-entries-container" class="history-list">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="btn-close-history-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <p>Goal Progress &amp; Consistency Tracker &bull; Base R &amp; Plumber Analytical Engine &bull; Deterministic Classification Architecture</p>
+      <p class="footer-note">Rule-based productivity evaluation &bull; 7-day inactivity threshold &bull; Multi-milestone tracking</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

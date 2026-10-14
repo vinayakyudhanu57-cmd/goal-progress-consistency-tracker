@@ -1,0 +1,27 @@
+id,goal_id,date_offset_days,value,notes
+prog_1,goal_1,-20,6.0,Arrays & Strings fundamental problems
+prog_2,goal_1,-17,8.0,Linked list reversal and cycle detection
+prog_3,goal_1,-14,6.0,Stack and queue practical problems
+prog_4,goal_1,-10,8.0,Binary tree depth and BST search
+prog_5,goal_1,-6,7.0,Heap operations and priority queue tasks
+prog_6,goal_1,-2,7.0,Graph BFS and DFS problem sets
+prog_7,goal_2,-28,3.0,Chapters 1-3: Architecture foundations
+prog_8,goal_2,-22,3.0,Chapters 4-6: Replication and consensus
+prog_9,goal_2,-16,3.0,Chapters 7-9: Partitioning & transactions
+prog_10,goal_2,-9,3.0,Chapters 10-12: Batch and stream pipelines
+prog_11,goal_2,-1,3.0,Chapters 13-15: Case studies and conclusion
+prog_12,goal_3,-24,3.0,"Wireframes, layout grid, and style tokens"
+prog_13,goal_3,-20,2.0,Core responsive container components
+prog_14,goal_3,-11,3.0,Central state management store setup
+prog_15,goal_4,-38,8.0,Cloud compute primitives and serverless
+prog_16,goal_4,-30,7.0,Relational and document storage options
+prog_17,goal_4,-21,7.0,Virtual private networks and routing
+prog_18,goal_4,-5,6.0,Identity access and encryption standards
+prog_19,goal_5,-11,3.5,Morning outdoor jog
+prog_20,goal_5,-10,3.0,Tempo baseline run
+prog_21,goal_5,-8,4.0,Endurance distance lap
+prog_22,goal_5,-7,3.5,Active recovery session
+prog_23,goal_5,-5,3.0,Morning pace workout
+prog_24,goal_5,-3,4.0,Mid-week extended run
+prog_25,goal_5,-2,2.5,Cadence and stride focus
+prog_26,goal_5,-1,2.5,Morning 2.5k jog
